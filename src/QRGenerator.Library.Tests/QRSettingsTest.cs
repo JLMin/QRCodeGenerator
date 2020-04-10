@@ -6,7 +6,7 @@ namespace QRGenerator.Library.Tests
     public class QRSettingsTest
     {
         [TestMethod]
-        public void Settings_default_data_link_to_github()
+        public void Settings_default_data()
         {
             string url = "https://github.com/JLMin/QRCodeGenerator";
             QRSettings settings = new QRSettings();

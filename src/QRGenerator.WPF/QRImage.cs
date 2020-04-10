@@ -1,44 +1,35 @@
 ﻿using QRGenerator.Library;
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Media.Imaging;
 
 namespace QRGenerator.WPF
 {
+    struct ImageSettings
+    {
+        public int qrSize;
+        public int blockSize;
+        public Color bgColor;
+        public Color qrColor;
+        public int[] data;
+    }
+
     public class QRImage
     {
         public static Bitmap CreateBitmap(QRSettings settings)
         {
             // TODO: from settings
-            int qr_size = 400;
-            int block_size = 20;
-            Color bgcolor = Color.Gray;
-            Brush black = Brushes.Black;
-            Brush white = Brushes.White;
+            ImageSettings imSettings;
+            imSettings.qrSize = 400;
+            imSettings.blockSize = 20;
+            imSettings.data = RandomData(400);
+            // TODO: from gui
+            imSettings.bgColor = Color.Gray;
+            imSettings.qrColor = Color.Black;
 
-            Bitmap bitmap = new Bitmap(qr_size, qr_size);
-            Point p = new Point(0, 0);
-            using Graphics graphic = Graphics.FromImage(bitmap);
-            graphic.Clear(bgcolor);
-
-            int[] data = RandomData((int)Math.Pow(qr_size / block_size, 2));
-
-            for (int i = 0; i < data.Length; i++)
-            {
-                Brush brush = (data[i] == 1) ? black : white;
-                Rectangle rect = new Rectangle(p.X, p.Y, block_size, block_size);
-                graphic.FillRectangle(brush, rect);
-                p.X += block_size;
-                if (p.X >= qr_size)
-                {
-                    p.X = 0;
-                    p.Y += block_size;
-                }
-            }
-            return bitmap;
+            return FillBitmap(imSettings);
         }
 
         public static BitmapImage BitmapToImageSource(Bitmap bitmap)
@@ -54,6 +45,35 @@ namespace QRGenerator.WPF
             return bitmapimage;
         }
 
+        private static Bitmap FillBitmap(ImageSettings settings)
+        {
+            int qrSize = settings.qrSize;
+            int blockSize = settings.blockSize;
+            Color bgColor = settings.bgColor;
+            Brush qrColor = new SolidBrush(settings.qrColor);
+            Brush white = Brushes.White;
+            int[] data = settings.data;
+
+            Bitmap bitmap = new Bitmap(qrSize, qrSize);
+            Point p = new Point(0, 0);
+            Graphics graphic = Graphics.FromImage(bitmap);
+            graphic.Clear(bgColor);
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                Brush brush = (data[i] == 1) ? qrColor : white;
+                Rectangle rect = new Rectangle(p.X, p.Y, blockSize, blockSize);
+                graphic.FillRectangle(brush, rect);
+                p.X += blockSize;
+                if (p.X >= qrSize)
+                {
+                    p.X = 0;
+                    p.Y += blockSize;
+                }
+            }
+            return bitmap;
+        }
+
         private static int[] RandomData(int size)
         {
             Random random = new Random();
@@ -64,5 +84,6 @@ namespace QRGenerator.WPF
             }
             return array;
         }
+
     }
 }
